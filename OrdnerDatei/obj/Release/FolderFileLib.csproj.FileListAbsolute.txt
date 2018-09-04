@@ -1,0 +1,35 @@
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei - Kopie\OrdnerDatei\obj\Release\FileControl.g.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei - Kopie\OrdnerDatei\obj\Release\FolderControl.g.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei - Kopie\OrdnerDatei\obj\Release\FileControl.baml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei - Kopie\OrdnerDatei\obj\Release\FolderControl.baml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei - Kopie\OrdnerDatei\bin\Release\FolderFileLib.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei - Kopie\OrdnerDatei\bin\Release\FolderFileLib.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei - Kopie\OrdnerDatei\obj\Release\FolderFileLib_MarkupCompile.cache
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei - Kopie\OrdnerDatei\obj\Release\FolderFileLib_MarkupCompile.lref
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei - Kopie\OrdnerDatei\obj\Release\FolderFileLib.g.resources
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei - Kopie\OrdnerDatei\obj\Release\FolderFileLib.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei - Kopie\OrdnerDatei\obj\Release\FolderFileLib.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei\OrdnerDatei\bin\Release\FolderFileLib.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei\OrdnerDatei\bin\Release\FolderFileLib.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei\OrdnerDatei\obj\Release\FolderFileLib_MarkupCompile.cache
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei\OrdnerDatei\obj\Release\FolderFileLib_MarkupCompile.lref
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei\OrdnerDatei\obj\Release\FolderFileLib.g.resources
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei\OrdnerDatei\obj\Release\FolderFileLib.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei\OrdnerDatei\obj\Release\FolderFileLib.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei\OrdnerDatei\obj\Release\File\FilePicker.g.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei\OrdnerDatei\obj\Release\Folder\FolderPicker.g.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei\OrdnerDatei\obj\Release\File\FilePicker.baml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei\OrdnerDatei\obj\Release\Folder\FolderPicker.baml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei\OrdnerDatei\obj\Release\FolderFileLib.csprojResolveAssemblyReference.cache
+G:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei\OrdnerDatei\bin\Release\FolderFileLib.dll
+G:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei\OrdnerDatei\bin\Release\FolderFileLib.pdb
+G:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei\OrdnerDatei\obj\Release\FolderFileLib.csprojResolveAssemblyReference.cache
+G:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei\OrdnerDatei\obj\Release\File\FilePicker.g.cs
+G:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei\OrdnerDatei\obj\Release\Folder\FolderPicker.g.cs
+G:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei\OrdnerDatei\obj\Release\FolderFileLib_MarkupCompile.cache
+G:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei\OrdnerDatei\obj\Release\FolderFileLib_MarkupCompile.lref
+G:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei\OrdnerDatei\obj\Release\File\FilePicker.baml
+G:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei\OrdnerDatei\obj\Release\Folder\FolderPicker.baml
+G:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei\OrdnerDatei\obj\Release\FolderFileLib.g.resources
+G:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei\OrdnerDatei\obj\Release\FolderFileLib.dll
+G:\Users\Clemens\Documents\Visual Studio 2015\Projects\OrdnerDatei\OrdnerDatei\obj\Release\FolderFileLib.pdb
