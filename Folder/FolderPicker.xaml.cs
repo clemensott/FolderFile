@@ -1,8 +1,6 @@
 ﻿using System.Windows.Controls;
 using System.Diagnostics;
 using System.Windows;
-using System.ComponentModel;
-using System;
 using System.IO;
 
 namespace FolderFile
@@ -18,55 +16,45 @@ namespace FolderFile
 
         public static readonly DependencyProperty FolderProperty = DependencyProperty.Register("Folder",
             typeof(Folder), typeof(FolderPicker), new PropertyMetadata(new Folder("", SubfolderType.No),
-                new PropertyChangedCallback(OnFirstFolderPropertyChanged)));
+                new PropertyChangedCallback(OnFolderPropertyChanged)));
 
         public static readonly DependencyProperty DirectoryProperty = DependencyProperty.Register("Directory",
             typeof(DirectoryInfo), typeof(FolderPicker), new PropertyMetadata(
-                new PropertyChangedCallback(OnFirstDirectoryPropertyChanged)));
+                new PropertyChangedCallback(OnDirectoryPropertyChanged)));
 
-        private static void OnFirstFolderPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        private static void OnFolderPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             var s = sender as FolderPicker;
+            var value = (Folder)e.NewValue;
 
             if (s != null) s.Folder = e.NewValue as Folder;
+
+            s.cbx_uo.IsChecked = value.WithSubfolder;
+            s.tbx_path.Text = s.fbd.SelectedPath = value.Path;
+
+            if (s.Directory == null || value.Info.FullName != s.Directory.FullName ||
+                value.Info.LastWriteTime != s.Directory.LastWriteTime) s.Directory = value.Info;
         }
 
-        private static void OnFirstDirectoryPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        private static void OnDirectoryPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             var s = sender as FolderPicker;
+            var value = (DirectoryInfo)e.NewValue;
 
-            if (s != null) s.Directory = e.NewValue as DirectoryInfo;
+            if (s.Folder.Info == null || s.Folder.Info.FullName != value.FullName ||
+                s.Folder.Info.LastWriteTime != value.LastWriteTime) s.Folder = s.GetFolder(value.FullName);
         }
 
         public DirectoryInfo Directory
         {
             get { return (DirectoryInfo)GetValue(DirectoryProperty); }
-            set
-            {
-                SetValue(DirectoryProperty, value);
-
-                if (value == null) return;
-
-                if (Folder.Info == null || Folder.Info.FullName != value.FullName ||
-                    Folder.Info.LastWriteTime != value.LastWriteTime) Folder = GetFolder(value.FullName);       //          */
-            }
+            set { SetValue(DirectoryProperty, value); }
         }
 
         public Folder Folder
         {
             get { return (Folder)GetValue(FolderProperty); }
-            set
-            {
-                SetValue(FolderProperty, value);
-
-                if (value == null) return;
-
-                cbx_uo.IsChecked = value.WithSubfolder;
-                tbx_path.Text = fbd.SelectedPath = value.Path;
-
-                if (Directory == null || value.Info.FullName != Directory.FullName ||
-                    value.Info.LastWriteTime != Directory.LastWriteTime) Directory = value.Info;        //      */
-            }
+            set { SetValue(FolderProperty, value); }
         }
 
         public bool WithCheckbox
@@ -118,7 +106,11 @@ namespace FolderFile
 
         private void Open_Click(object sender, RoutedEventArgs e)
         {
-            Process.Start(tbx_path.Text);
+            try
+            {
+                Folder?.OpenInExplorer();
+            }
+            catch { }
         }
 
         private void tbx_path_LostFocus(object sender, RoutedEventArgs e)
