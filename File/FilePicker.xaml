@@ -10,7 +10,7 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="5" Name="cdMargin"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
@@ -18,9 +18,12 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        
-        <TextBox Name="tbx_path" LostFocus="tbx_path_LostFocus" VerticalAlignment="Center"/>
-        <Button Grid.Column="1" Name="btn_change" Content="Ändern" Margin="6,0" Padding="10,3,10,3" Click="Change_Click" VerticalAlignment="Center"/>
-        <Button Grid.Column="2" Name="btn_open" Content="Öffnen" Padding="10,3,10,3" Click="Open_Click" VerticalAlignment="Center"/>
+
+        <TextBox Name="tbxPath" VerticalAlignment="Stretch" BorderThickness="1" BorderBrush="Transparent" TextChanged="TbxPath_TextChanged"/>
+
+        <StackPanel Grid.Column="2" Name="splMove" Orientation="Horizontal">
+            <Button Content="Change" Padding="10,3,10,3" Click="BtnChange_Click" VerticalAlignment="Center"/>
+            <Button Content="Open" Margin="6,0,0,0" Padding="10,3,10,3" Click="BtnOpen_Click" VerticalAlignment="Center"/>
+        </StackPanel>
     </Grid>
 </UserControl>
