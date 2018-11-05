@@ -44,21 +44,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="File\FileExtension.cs" />
-    <Compile Include="File\FilePickerPositionsOneLine.cs" />
-    <Compile Include="File\FilePickerPositionsTwoLines.cs" />
     <Compile Include="File\FilePicker.xaml.cs">
       <DependentUpon>FilePicker.xaml</DependentUpon>
     </Compile>
     <Compile Include="File\FileOpenPicker.cs" />
     <Compile Include="File\FileSavePicker.cs" />
-    <Compile Include="Folder\FolderPickerPositionsOneLine.cs" />
-    <Compile Include="Folder\FolderPickerPositionsTwoLines.cs" />
-    <Compile Include="Folder\Folder.cs" />
-    <Compile Include="Folder\FolderPicker.xaml.cs">
-      <DependentUpon>FolderPicker.xaml</DependentUpon>
+    <Compile Include="Folder\DirectoryInfoExtenion.cs" />
+    <Compile Include="Folder\DirectoryPicker.xaml.cs">
+      <DependentUpon>DirectoryPicker.xaml</DependentUpon>
     </Compile>
-    <Compile Include="File\IFilePickerPositions.cs" />
-    <Compile Include="Folder\IFolderPickerPositions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -66,7 +60,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Folder\FolderPicker.xaml">
+    <Page Include="Folder\DirectoryPicker.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

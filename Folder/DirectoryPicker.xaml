@@ -1,0 +1,36 @@
+﻿<UserControl x:Class="FolderFile.DirectoryPicker"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:FolderFile"
+             mc:Ignorable="d" 
+             d:DesignHeight="24" d:DesignWidth="500"
+             AllowDrop="True" DragDrop.Drop="Control_Drop">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto" Name="cdMargin"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBox Name="tbxPath" TextChanged="TbxPath_TextChanged" VerticalAlignment="Stretch" BorderThickness="1" BorderBrush="Transparent"/>
+
+        <StackPanel Name="splMove" Grid.Column="1" Orientation="Horizontal">
+            <CheckBox Grid.Column="1" Name="CbxSubfolder" Content="Subdirectory" VerticalAlignment="Center"
+                  HorizontalAlignment="Center" Margin="0,0,3,0" Checked="CbxSubfolder_Checked" Unchecked="CbxSubfolder_Unchecked"/>
+
+            <Button Grid.Column="2" Content="Change" Margin="3,0" 
+                Padding="10,3,10,3" Click="BtnChange_Click" VerticalAlignment="Center"/>
+            <Button Grid.Column="2" Content="Reload" Margin="3,0" 
+                Padding="10,3,10,3" Click="BtnReload_Click" VerticalAlignment="Center"/>
+            <Button Grid.Column="3" Content="Open" Margin="3,0,0,0" 
+                Padding="10,3,10,3" Click="BtnOpen_Click" VerticalAlignment="Center"/>
+        </StackPanel>
+    </Grid>
+</UserControl>
