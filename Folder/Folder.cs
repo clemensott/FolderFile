@@ -10,14 +10,12 @@ namespace FolderFile
 
     public class Folder
     {
-        private bool loaded;
-        private string path, fullPath;
         private FileInfo[] files;
         private Folder[] folders;
 
         private SubfolderType subfolder;
 
-        public bool IsLoaded { get { return loaded; } }
+        public bool IsLoaded { get; private set; }
 
         public bool WithSubfolder
         {
@@ -25,11 +23,11 @@ namespace FolderFile
             set { SubfolderType = value ? SubfolderType.All : SubfolderType.This; }
         }
 
-        public string Path { get { return path; } }
+        public string Path { get; private set; }
 
-        public string FullPath { get { return fullPath; } }
+        public string FullPath { get; private set; }
 
-        public DirectoryInfo Info { get { return new DirectoryInfo(FullPath); } }
+        public DirectoryInfo Info { get; private set; }
 
         public SubfolderType SubfolderType
         {
@@ -46,9 +44,11 @@ namespace FolderFile
 
         public Folder(string path, SubfolderType subfolderType)
         {
-            this.path = path;
-            fullPath = GetFullPath(path);
+            Path = path;
+            FullPath = GetFullPath(path);
             subfolder = subfolderType;
+
+            Info = new DirectoryInfo(FullPath);
 
             RefreshFolderAndFiles();
         }
@@ -130,7 +130,7 @@ namespace FolderFile
 
         public void OpenInExplorer()
         {
-            Process.Start(fullPath);
+            Process.Start(FullPath);
         }
 
         public void RefreshFolderAndFiles()
@@ -140,10 +140,12 @@ namespace FolderFile
 
         public void RefreshFolderAndFiles(SubfolderType subfolderType)
         {
+            Info.Refresh();
+
             FileInfo[] newFiles = new FileInfo[0];
             Folder[] newFolders = new Folder[0];
 
-            loaded = false;
+            IsLoaded = false;
             subfolder = subfolderType;
 
             if (subfolderType != SubfolderType.No)
@@ -151,7 +153,7 @@ namespace FolderFile
                 newFiles = GetFilesFileArrayFromDirectory();
                 newFolders = GetListFolderFromDirectory(subfolderType);
 
-                loaded = true;
+                IsLoaded = true;
             }
 
             files = newFiles;

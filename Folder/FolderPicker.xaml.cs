@@ -1,7 +1,6 @@
-﻿using System.Windows.Controls;
-using System.Diagnostics;
+﻿using System.IO;
 using System.Windows;
-using System.IO;
+using System.Windows.Controls;
 
 namespace FolderFile
 {
@@ -27,13 +26,11 @@ namespace FolderFile
             var s = sender as FolderPicker;
             var value = (Folder)e.NewValue;
 
-            if (s != null) s.Folder = e.NewValue as Folder;
+            s.cbx_uo.IsChecked = value?.WithSubfolder ?? false;
+            s.tbx_path.Text = s.fbd.SelectedPath = value?.Path;
 
-            s.cbx_uo.IsChecked = value.WithSubfolder;
-            s.tbx_path.Text = s.fbd.SelectedPath = value.Path;
-
-            if (s.Directory == null || value.Info.FullName != s.Directory.FullName ||
-                value.Info.LastWriteTime != s.Directory.LastWriteTime) s.Directory = value.Info;
+            if (s.Directory == null || value?.Info.FullName != s.Directory.FullName ||
+                value?.Info.LastWriteTime != s.Directory.LastWriteTime) s.Directory = value?.Info;
         }
 
         private static void OnDirectoryPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
@@ -41,7 +38,7 @@ namespace FolderFile
             var s = sender as FolderPicker;
             var value = (DirectoryInfo)e.NewValue;
 
-            if (s.Folder.Info == null || s.Folder.Info.FullName != value.FullName ||
+            if (s.Folder?.Info == null || s.Folder?.Info?.FullName != value.FullName ||
                 s.Folder.Info.LastWriteTime != value.LastWriteTime) s.Folder = s.GetFolder(value.FullName);
         }
 
