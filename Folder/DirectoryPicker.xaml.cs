@@ -45,6 +45,8 @@ namespace FolderFile
             var s = (DirectoryPicker)sender;
             var value = (SubdirectoryType)e.NewValue;
 
+            s.CbxSubfolder.Visibility = value == SubdirectoryType.No ? Visibility.Collapsed : Visibility.Visible;
+
             s.Files = s.Directory?.EnmuerateFiles(value);
         }
 

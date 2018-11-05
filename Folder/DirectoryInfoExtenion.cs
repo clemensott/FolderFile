@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -12,7 +11,14 @@ namespace FolderFile
     {
         public static IEnumerable<FileInfo> EnmuerateFiles(this DirectoryInfo dir, SubdirectoryType type)
         {
-            return EnumerateDirectories(dir, type).SelectMany(d => d.GetFiles());
+            if (type == SubdirectoryType.No) yield break;
+            if (type == SubdirectoryType.This) type = SubdirectoryType.No;
+
+            foreach (FileInfo file in dir.GetFiles()) yield return file;
+            foreach (FileInfo file in EnumerateDirectories(dir, type).SelectMany(d => d.GetFiles()))
+            {
+                yield return file;
+            }
         }
 
         public static IEnumerable<DirectoryInfo> EnumerateDirectories(this DirectoryInfo dir, SubdirectoryType type)
