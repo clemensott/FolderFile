@@ -1,226 +1,115 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace FolderFile
 {
-    public enum SubfolderType { No, This, All }
-
-    public class Folder
+    public class Folder : INotifyPropertyChanged
     {
+        private SubfolderType subType;
         private FileInfo[] files;
-        private Folder[] folders;
 
-        private SubfolderType subfolder;
+        public string OriginalPath { get; private set; }
 
-        public bool IsLoaded { get; private set; }
+        public string Name { get; private set; }
 
-        public bool WithSubfolder
+        public string FullName { get; private set; }
+
+        public DirectoryInfo Directory { get; private set; }
+
+        public SubfolderType SubType
         {
-            get { return subfolder == SubfolderType.All; }
-            set { SubfolderType = value ? SubfolderType.All : SubfolderType.This; }
-        }
-
-        public string Path { get; private set; }
-
-        public string FullPath { get; private set; }
-
-        public DirectoryInfo Info { get; private set; }
-
-        public SubfolderType SubfolderType
-        {
-            get { return subfolder; }
+            get { return subType; }
             set
             {
-                if (value == subfolder) return;
+                if (value == subType) return;
 
-                subfolder = value;
-
-                RefreshFolderAndFiles();
+                subType = value;
+                OnPropertyChanged(nameof(SubType));
+                Refresh();
             }
         }
 
-        public Folder(string path, SubfolderType subfolderType)
+        public FileInfo[] Files
         {
-            Path = path;
-            FullPath = GetFullPath(path);
-            subfolder = subfolderType;
-
-            Info = new DirectoryInfo(FullPath);
-
-            RefreshFolderAndFiles();
-        }
-
-        private string GetFullPath(string path)
-        {
-            return path != "" ? System.IO.Path.GetFullPath(path) :
-                Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-        }
-
-        public FileInfo[] GetFiles()
-        {
-            return GetFiles(subfolder == SubfolderType.All);
-        }
-
-        public FileInfo[] GetFiles(bool withSubfolder)
-        {
-            List<FileInfo> allFiles = new List<FileInfo>(files);
-
-            if (withSubfolder)
+            get { return files; }
+            set
             {
-                foreach (Folder getFolder in folders)
-                {
-                    allFiles.AddRange(getFolder.GetFiles());
-                }
-            }
+                if (value == files) return;
 
-            return allFiles.ToArray();
-        }
-
-        public Folder[] GetFolders()
-        {
-            return GetFolders(subfolder == SubfolderType.All);
-        }
-
-        public Folder[] GetFolders(bool withSubfolder)
-        {
-            List<Folder> allFolder = new List<Folder>(folders);
-
-            if (withSubfolder)
-            {
-                foreach (Folder getFolder in folders)
-                {
-                    allFolder.AddRange(getFolder.GetFolders());
-                }
-            }
-
-            return allFolder.ToArray();
-        }
-
-        private FileInfo[] GetFilesFileArrayFromDirectory()
-        {
-            try
-            {
-                return Info.GetFiles();
-            }
-            catch (Exception e)
-            {
-                return new FileInfo[0];
+                files = value;
+                OnPropertyChanged(nameof(Files));
             }
         }
 
-        private Folder[] GetListFolderFromDirectory(SubfolderType subfolderType)
+        public Folder(string path, SubfolderType subType)
         {
-            SubfolderType subfolderTypeOfSubfolder;
-
-            if (subfolderType == SubfolderType.All) subfolderTypeOfSubfolder = SubfolderType.All;
-            else subfolderTypeOfSubfolder = SubfolderType.No;
+            OriginalPath = path;
 
             try
             {
-                return Info.GetDirectories().Select(d => new Folder(d.FullName, subfolderTypeOfSubfolder)).ToArray();
+                Directory = new DirectoryInfo(path);
             }
-            catch
-            {
-                return new Folder[0];
-            }
+            catch { }
+
+            Name = Directory?.Name;
+            FullName = Directory?.FullName;
+
+            Refresh();
+        }
+
+        public Folder(DirectoryInfo directory, SubfolderType subType)
+        {
+            Directory = directory;
+
+            OriginalPath = Directory?.FullName;
+            Name = Directory?.Name;
+            FullName = Directory?.FullName;
+
+            Refresh();
+        }
+
+        public FileInfo[] Refresh()
+        {
+            if (Directory == null) return new FileInfo[0];
+
+            return Files = DirectoryInfoExtension.EnumerateFiles(Directory, SubType).ToArray();
         }
 
         public void OpenInExplorer()
         {
-            Process.Start(FullPath);
-        }
-
-        public void RefreshFolderAndFiles()
-        {
-            RefreshFolderAndFiles(subfolder);
-        }
-
-        public void RefreshFolderAndFiles(SubfolderType subfolderType)
-        {
-            Info.Refresh();
-
-            FileInfo[] newFiles = new FileInfo[0];
-            Folder[] newFolders = new Folder[0];
-
-            IsLoaded = false;
-            subfolder = subfolderType;
-
-            if (subfolderType != SubfolderType.No)
-            {
-                newFiles = GetFilesFileArrayFromDirectory();
-                newFolders = GetListFolderFromDirectory(subfolderType);
-
-                IsLoaded = true;
-            }
-
-            files = newFiles;
-            folders = newFolders;
-        }
-
-        public void Delete()
-        {
-            DeleteContent();
-
-            Info.Delete();
+            Directory.OpenInExplorer();
         }
 
         public void DeleteContent()
         {
-            foreach (FileInfo file in GetFiles()) file.Delete();
-            foreach (Folder folder in GetFolders()) folder.Delete();
-
-            SubfolderType typeBackup = subfolder;
-            RefreshFolderAndFiles();
-
-            foreach (FileInfo file in GetFiles()) file.Delete();
-            foreach (Folder folder in GetFolders()) folder.Delete();
-
-            RefreshFolderAndFiles(typeBackup);
+            DeleteContent(SubType);
         }
 
-        public void DeletContent(bool withSubfolder)
+        public void DeleteContent(SubfolderType type)
         {
-            foreach (FileInfo file in GetFiles(withSubfolder)) file.Delete();
-
-            SubfolderType typeBackup = subfolder;
-            RefreshFolderAndFiles(withSubfolder ? SubfolderType.All : SubfolderType.This);
-
-            foreach (FileInfo file in GetFiles(withSubfolder)) file.Delete();
-
-            RefreshFolderAndFiles(typeBackup);
+            Directory?.DeleteContent(type);
         }
 
-        private long GetSize(bool withSubfolder)
+        public long GetLength()
         {
-            long size = 0;
-            FileInfo[] sizeOfFiles = GetFiles(withSubfolder);
-
-            foreach (FileInfo file in sizeOfFiles)
-            {
-                size += file.Length;
-            }
-
-            return size;
+            return GetLength(SubType);
         }
 
-        public long GetRefreshedSize()
+        public long GetLength(SubfolderType type)
         {
-            return GetRefreshedSize(WithSubfolder);
+            return Directory?.GetLength(type) ?? 0L;
         }
 
-        public long GetRefreshedSize(bool withSubfolder)
-        {
-            RefreshFolderAndFiles(withSubfolder ? SubfolderType.All : SubfolderType.This);
+        public event PropertyChangedEventHandler PropertyChanged;
 
-            return GetSize(withSubfolder);
-        }
-
-        public override string ToString()
+        private void OnPropertyChanged(string name)
         {
-            return Path;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
     }
 }

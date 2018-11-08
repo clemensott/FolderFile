@@ -15,12 +15,12 @@ namespace FolderFile
         private const double margin = 5;
 
         public static readonly DependencyProperty SingleLineProperty =
-            DependencyProperty.Register("SingleLine", typeof(bool), typeof(DirectoryPicker),
+            DependencyProperty.Register("SingleLine", typeof(bool), typeof(FilePicker),
                 new PropertyMetadata(true, new PropertyChangedCallback(OnSingleLinePropertyChanged)));
 
         private static void OnSingleLinePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var s = (DirectoryPicker)sender;
+            var s = (FilePicker)sender;
             var value = (bool)e.NewValue;
 
             if (value)

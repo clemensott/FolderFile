@@ -1,6 +1,8 @@
-﻿using System.IO;
+﻿using System.Windows.Controls;
 using System.Windows;
-using System.Windows.Controls;
+using System.IO;
+using System.Windows.Media;
+using System.ComponentModel;
 
 namespace FolderFile
 {
@@ -9,43 +11,57 @@ namespace FolderFile
     /// </summary>
     public partial class FolderPicker : UserControl
     {
-        private bool withCheckbox, twoLines;
-        private System.Windows.Forms.FolderBrowserDialog fbd;
-        private IFolderPickerPositions positionSeter;
+        private const double margin = 5;
+        private static readonly Brush errorBrush = new SolidColorBrush(Colors.Red);
+
+        public static readonly DependencyProperty SingleLineProperty =
+            DependencyProperty.Register("SingleLine", typeof(bool), typeof(FolderPicker),
+                new PropertyMetadata(true, new PropertyChangedCallback(OnSingleLinePropertyChanged)));
+
+        private static void OnSingleLinePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            var s = (FolderPicker)sender;
+            var value = (bool)e.NewValue;
+
+            if (value)
+            {
+                s.splMove.SetValue(Grid.ColumnProperty, 2);
+                s.splMove.SetValue(Grid.RowProperty, 0);
+                s.cdMargin.Width = new GridLength(margin);
+                s.rdMargin.Height = new GridLength(0);
+            }
+            else
+            {
+                s.splMove.SetValue(Grid.ColumnProperty, 0);
+                s.splMove.SetValue(Grid.RowProperty, 2);
+                s.cdMargin.Width = new GridLength(0);
+                s.rdMargin.Height = new GridLength(margin);
+            }
+        }
 
         public static readonly DependencyProperty FolderProperty = DependencyProperty.Register("Folder",
-            typeof(Folder), typeof(FolderPicker), new PropertyMetadata(new Folder("", SubfolderType.No),
+            typeof(Folder), typeof(FolderPicker), new PropertyMetadata(
                 new PropertyChangedCallback(OnFolderPropertyChanged)));
-
-        public static readonly DependencyProperty DirectoryProperty = DependencyProperty.Register("Directory",
-            typeof(DirectoryInfo), typeof(FolderPicker), new PropertyMetadata(
-                new PropertyChangedCallback(OnDirectoryPropertyChanged)));
 
         private static void OnFolderPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             var s = sender as FolderPicker;
-            var value = (Folder)e.NewValue;
+            var oldValue = (Folder)e.OldValue;
+            var newValue = (Folder)e.NewValue;
 
-            s.cbx_uo.IsChecked = value?.WithSubfolder ?? false;
-            s.tbx_path.Text = s.fbd.SelectedPath = value?.Path;
+            if (oldValue != null) oldValue.PropertyChanged -= s.Folder_PropertyChanged;
+            if (newValue != null) newValue.PropertyChanged -= s.Folder_PropertyChanged;
 
-            if (s.Directory == null || value?.Info.FullName != s.Directory.FullName ||
-                value?.Info.LastWriteTime != s.Directory.LastWriteTime) s.Directory = value?.Info;
+            s.UpdateCbxSubfolder();
         }
 
-        private static void OnDirectoryPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
-        {
-            var s = sender as FolderPicker;
-            var value = (DirectoryInfo)e.NewValue;
+        private readonly Brush tbxPathForeground;
+        private System.Windows.Forms.FolderBrowserDialog fbd;
 
-            if (s.Folder?.Info == null || s.Folder?.Info?.FullName != value.FullName ||
-                s.Folder.Info.LastWriteTime != value.LastWriteTime) s.Folder = s.GetFolder(value.FullName);
-        }
-
-        public DirectoryInfo Directory
+        public bool SingleLine
         {
-            get { return (DirectoryInfo)GetValue(DirectoryProperty); }
-            set { SetValue(DirectoryProperty, value); }
+            get { return (bool)GetValue(SingleLineProperty); }
+            set { SetValue(SingleLineProperty, value); }
         }
 
         public Folder Folder
@@ -54,54 +70,48 @@ namespace FolderFile
             set { SetValue(FolderProperty, value); }
         }
 
-        public bool WithCheckbox
-        {
-            get { return withCheckbox; }
-            set
-            {
-                if (withCheckbox == value) return;
-
-                withCheckbox = value;
-                cbx_uo.Visibility = withCheckbox ? Visibility.Visible : Visibility.Collapsed;
-            }
-        }
-
-        public bool TwoLines
-        {
-            get { return twoLines; }
-            set
-            {
-                if (twoLines == value) return;
-
-                twoLines = value;
-
-                if (twoLines) positionSeter = new FolderPickerPositionsTwoLines();
-                else positionSeter = new FolderPickerPositionsOneLine();
-
-                positionSeter.SetPositionsAndMargin(tbx_path, cbx_uo, btn_change, btn_open);
-            }
-        }
-
         public FolderPicker()
         {
             InitializeComponent();
 
+            tbxPathForeground = tbxPath.Foreground;
             fbd = new System.Windows.Forms.FolderBrowserDialog();
-            withCheckbox = !withCheckbox;
-            WithCheckbox = !withCheckbox;
-            TwoLines = twoLines;
         }
 
-        private void Change_Click(object sender, RoutedEventArgs e)
+        private void TbxPath_TextChanged(object sender, TextChangedEventArgs e)
         {
+            tbxPath.Foreground = Directory.Exists(tbxPath.Text) ? tbxPathForeground : errorBrush;
+
+            Folder = new Folder(tbxPath.Text, GetSubfolderType());
+        }
+
+        private void CbxSubfolder_Checked(object sender, RoutedEventArgs e)
+        {
+            if (Folder != null) Folder.SubType = SubfolderType.All;
+        }
+
+        private void CbxSubfolder_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (Folder != null) Folder.SubType = SubfolderType.This;
+        }
+
+        private void BtnChange_Click(object sender, RoutedEventArgs e)
+        {
+            if (Folder != null) fbd.SelectedPath = Folder.FullName;
+
             if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                Folder = GetFolder(fbd.SelectedPath);
-                tbx_path.Text = Folder.Path;
+                Folder = new Folder(fbd.SelectedPath, GetSubfolderType());
+                tbxPath.Text = Folder.FullName;
             }
         }
 
-        private void Open_Click(object sender, RoutedEventArgs e)
+        private void BtnRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            Folder?.Refresh();
+        }
+
+        private void BtnOpen_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -110,50 +120,64 @@ namespace FolderFile
             catch { }
         }
 
-        private void tbx_path_LostFocus(object sender, RoutedEventArgs e)
-        {
-            Folder directory = GetFolder(tbx_path.Text);
-
-            //if (directory.Exists() || (directory.FullPath != "" && MessageBox.Show("Der Folder \"" +
-            //    directory.FullPath + "\" existiert nicht.\n\nTrotzdem übernehmen?",
-            //    "Fehler", MessageBoxButton.YesNo) == MessageBoxResult.Yes))
-            //{
-            Folder = GetFolder(tbx_path.Text);
-            //}
-        }
-
-        private void cbx_uo_Checked(object sender, RoutedEventArgs e)
-        {
-            if (Folder.WithSubfolder != cbx_uo.IsChecked)
-            {
-                Folder = GetFolder(tbx_path.Text);
-            }
-        }
-
-        private void tbx_path_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (System.IO.Directory.Exists(tbx_path.Text)) Folder = GetFolder(tbx_path.Text);
-        }
-
         private void Control_Drop(object sender, DragEventArgs e)
         {
             try
             {
-                string dropText = e.Data.GetData(DataFormats.Text).ToString();
-
-                Folder = GetFolder(dropText);
+                tbxPath.Text = e.Data.GetData(DataFormats.Text).ToString();
             }
             catch { }
         }
 
-        private Folder GetFolder(string path)
-        {
-            return new Folder(path, GetSubfolderType());
-        }
-
         private SubfolderType GetSubfolderType()
         {
-            return cbx_uo.IsChecked == true ? SubfolderType.All : SubfolderType.This;
+            if (Folder != null) return Folder.SubType;
+
+            switch (cbxSubfolder.IsChecked)
+            {
+                case true:
+                    return SubfolderType.All;
+
+                case false:
+                    return SubfolderType.This;
+
+                case null:
+                default:
+                    return SubfolderType.No;
+            }
+        }
+
+        private void Folder_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(Folder.SubType):
+                    UpdateCbxSubfolder();
+                    break;
+            }
+        }
+
+        private void UpdateCbxSubfolder()
+        {
+            if (Folder == null) return;
+
+            switch (Folder.SubType)
+            {
+                case SubfolderType.No:
+                    cbxSubfolder.Visibility = Visibility.Collapsed;
+                    cbxSubfolder.IsChecked = null;
+                    break;
+
+                case SubfolderType.This:
+                    cbxSubfolder.Visibility = Visibility.Visible;
+                    cbxSubfolder.IsChecked = false;
+                    break;
+
+                case SubfolderType.All:
+                    cbxSubfolder.Visibility = Visibility.Visible;
+                    cbxSubfolder.IsChecked = true;
+                    break;
+            }
         }
     }
 }

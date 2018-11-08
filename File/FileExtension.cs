@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace FolderFileLib
+namespace FolderFile
 {
     public static class FileExtension
     {
