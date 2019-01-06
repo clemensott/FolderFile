@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FolderFile
 {
@@ -49,6 +45,7 @@ namespace FolderFile
         public Folder(string path, SubfolderType subType)
         {
             OriginalPath = path;
+            SubType = subType;
 
             try
             {
@@ -75,9 +72,16 @@ namespace FolderFile
 
         public FileInfo[] Refresh()
         {
-            if (Directory == null) return new FileInfo[0];
+            if (Directory == null) return Files = new FileInfo[0];
 
-            return Files = DirectoryInfoExtension.EnumerateFiles(Directory, SubType).ToArray();
+            try
+            {
+                return Files = DirectoryInfoExtension.EnumerateFiles(Directory, SubType).ToArray();
+            }
+            catch
+            {
+                return Files = new FileInfo[0];
+            }
         }
 
         public void OpenInExplorer()

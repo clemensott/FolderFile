@@ -53,6 +53,7 @@ namespace FolderFile
             if (newValue != null) newValue.PropertyChanged -= s.Folder_PropertyChanged;
 
             s.UpdateCbxSubfolder();
+            s.tbxPath.Text = newValue?.OriginalPath ?? string.Empty;
         }
 
         private readonly Brush tbxPathForeground;
@@ -102,7 +103,7 @@ namespace FolderFile
             if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 Folder = new Folder(fbd.SelectedPath, GetSubfolderType());
-                tbxPath.Text = Folder.FullName;
+                tbxPath.Text = Folder.OriginalPath;
             }
         }
 
