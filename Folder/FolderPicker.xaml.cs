@@ -3,6 +3,7 @@ using System.Windows;
 using System.IO;
 using System.Windows.Media;
 using System.ComponentModel;
+using System;
 
 namespace FolderFile
 {
@@ -54,10 +55,15 @@ namespace FolderFile
 
             s.UpdateCbxSubfolder();
             s.tbxPath.Text = newValue?.OriginalPath ?? string.Empty;
+
+            var args = new FolderChangedArgs(oldValue, newValue);
+            s.FolderChanged?.Invoke(s, args);
         }
 
         private readonly Brush tbxPathForeground;
         private System.Windows.Forms.FolderBrowserDialog fbd;
+
+        public event EventHandler<FolderChangedArgs> FolderChanged;
 
         public bool SingleLine
         {
