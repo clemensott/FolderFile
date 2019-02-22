@@ -56,6 +56,7 @@
       <DependentUpon>FolderPicker.xaml</DependentUpon>
     </Compile>
     <Compile Include="Folder\Folder.cs" />
+    <Compile Include="Folder\SerializableFolder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
