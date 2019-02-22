@@ -5,8 +5,6 @@ using System.Linq;
 
 namespace FolderFile
 {
-    public enum SubfolderType { No, This, All }
-
     public static class DirectoryInfoExtension
     {
         public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo dir, SubfolderType type)

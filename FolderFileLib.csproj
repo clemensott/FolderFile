@@ -57,6 +57,7 @@
     </Compile>
     <Compile Include="Folder\Folder.cs" />
     <Compile Include="Folder\SerializableFolder.cs" />
+    <Compile Include="Folder\SubfolderType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
