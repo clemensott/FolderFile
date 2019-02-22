@@ -7,7 +7,7 @@
     <ProjectGuid>{0DE5F7B2-633A-4ACF-B6AD-DF37BD9E68D9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FolderFileLib</RootNamespace>
+    <RootNamespace>FolderFile</RootNamespace>
     <AssemblyName>FolderFileLib</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -57,6 +57,7 @@
     </Compile>
     <Compile Include="Folder\Folder.cs" />
     <Compile Include="Folder\SerializableFolder.cs" />
+    <Compile Include="Folder\SubfolderSelectionType.cs" />
     <Compile Include="Folder\SubfolderType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
