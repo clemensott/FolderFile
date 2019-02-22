@@ -7,15 +7,56 @@ namespace FolderFile
 {
     public static class DirectoryInfoExtension
     {
+        public static IEnumerable<FileInfo> EnumerateFilesThrow(this DirectoryInfo dir, SubfolderType type)
+        {
+            if (type == SubfolderType.No) yield break;
+            if (type == SubfolderType.This) type = SubfolderType.No;
+
+            foreach (FileInfo file in dir.GetFiles()) yield return file;
+            foreach (FileInfo file in EnumerateDirectoriesThrow(dir, type).SelectMany(d => d.GetFiles()))
+            {
+                yield return file;
+            }
+        }
+
         public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo dir, SubfolderType type)
         {
             if (type == SubfolderType.No) yield break;
             if (type == SubfolderType.This) type = SubfolderType.No;
 
             foreach (FileInfo file in dir.GetFiles()) yield return file;
-            foreach (FileInfo file in EnumerateDirectories(dir, type).SelectMany(d => d.GetFiles()))
+            foreach (FileInfo file in EnumerateDirectories(dir, type).SelectMany(GetFilesWithoutException))
             {
                 yield return file;
+            }
+        }
+
+        private static FileInfo[] GetFilesWithoutException(DirectoryInfo dir)
+        {
+            try
+            {
+                return dir.GetFiles();
+            }
+            catch
+            {
+                return new FileInfo[0];
+            }
+        }
+
+        public static IEnumerable<DirectoryInfo> EnumerateDirectoriesThrow(this DirectoryInfo dir, SubfolderType type)
+        {
+            if (type == SubfolderType.No) yield break;
+
+            foreach (DirectoryInfo subDir in dir.GetDirectories())
+            {
+                yield return subDir;
+
+                if (type == SubfolderType.This) continue;
+
+                foreach (DirectoryInfo subSubDir in EnumerateDirectoriesThrow(subDir, SubfolderType.All))
+                {
+                    yield return subSubDir;
+                }
             }
         }
 
@@ -23,7 +64,17 @@ namespace FolderFile
         {
             if (type == SubfolderType.No) yield break;
 
-            foreach (DirectoryInfo subDir in dir.GetDirectories())
+            DirectoryInfo[] subDirs;
+            try
+            {
+                subDirs = dir.GetDirectories();
+            }
+            catch
+            {
+                yield break;
+            }
+
+            foreach (DirectoryInfo subDir in subDirs)
             {
                 yield return subDir;
 

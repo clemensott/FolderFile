@@ -42,28 +42,34 @@ namespace FolderFile
             }
         }
 
+        private Folder(SubfolderType subType, FileInfo[] files, string originalPath, string name, string fullName, DirectoryInfo directory)
+        {
+            this.subType = subType;
+            this.files = files;
+            OriginalPath = originalPath;
+            Name = name;
+            FullName = fullName;
+            Directory = directory;
+        }
+
         public Folder(string path, SubfolderType subType)
         {
             OriginalPath = path;
             SubType = subType;
 
-            try
-            {
-                Directory = new DirectoryInfo(path);
-            }
-            catch { }
+            Directory = new DirectoryInfo(path);
 
-            Name = Directory?.Name;
-            FullName = Directory?.FullName;
+            Name = Directory.Name;
+            FullName = Directory.FullName;
 
             Refresh();
         }
 
         public Folder(DirectoryInfo directory, SubfolderType subType)
         {
-            Directory = directory;
+            Directory = directory ?? throw new System.ArgumentNullException(nameof(directory));
 
-            OriginalPath = Directory?.FullName;
+            OriginalPath = Directory.FullName;
             Name = Directory?.Name;
             FullName = Directory?.FullName;
 
@@ -76,12 +82,20 @@ namespace FolderFile
 
             try
             {
-                return Files = DirectoryInfoExtension.EnumerateFiles(Directory, SubType).ToArray();
+                Directory.Refresh();
             }
-            catch
-            {
-                return Files = new FileInfo[0];
-            }
+            catch { }
+
+            return Files = DirectoryInfoExtension.EnumerateFiles(Directory, SubType).ToArray();
+        }
+
+        public FileInfo[] RefreshThrow()
+        {
+            if (Directory == null) return Files = new FileInfo[0];
+
+            Directory.Refresh();
+
+            return Files = DirectoryInfoExtension.EnumerateFilesThrow(Directory, SubType).ToArray();
         }
 
         public void OpenInExplorer()
@@ -107,6 +121,11 @@ namespace FolderFile
         public long GetLength(SubfolderType type)
         {
             return Directory?.GetLength(type) ?? 0L;
+        }
+
+        public Folder Clone()
+        {
+            return new Folder(SubType, Files.ToArray(), OriginalPath, Name, FullName, new DirectoryInfo(Directory.FullName));
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
