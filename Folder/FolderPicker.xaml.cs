@@ -74,7 +74,12 @@ namespace FolderFile
             if (oldValue != null) oldValue.PropertyChanged -= s.Folder_PropertyChanged;
             if (newValue != null) newValue.PropertyChanged -= s.Folder_PropertyChanged;
 
-            if (newValue != null) s.UpdateCbxSubfolder();
+            if (newValue != null)
+            {
+                s.UpdateCbxSubfolder();
+
+                s.tbxPath.Text = newValue.OriginalPath;
+            }
             else
             {
                 (bool isVisable, bool? isChecked) = GetCbxSubfolderProperties(s.SubTypeSelection, oldValue.SubType);
@@ -82,8 +87,6 @@ namespace FolderFile
                 s.cbxSubfolder.Visibility = isVisable ? Visibility.Visible : Visibility.Collapsed;
                 s.cbxSubfolder.IsChecked = isChecked;
             }
-
-            s.tbxPath.Text = newValue?.OriginalPath ?? string.Empty;
 
             var args = new FolderChangedArgs(oldValue, newValue);
             s.FolderChanged?.Invoke(s, args);
