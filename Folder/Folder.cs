@@ -76,6 +76,42 @@ namespace FolderFile
             Refresh();
         }
 
+        public static bool TryCreate(SerializableFolder? serialFolder, out Folder folder)
+        {
+            try
+            {
+                if (serialFolder.HasValue)
+                {
+                    folder = serialFolder;
+                    return true;
+                }
+                else
+                {
+                    folder = null;
+                    return false;
+                }
+            }
+            catch
+            {
+                folder = null;
+                return false;
+            }
+        }
+
+        public static bool TryCreate(string path, SubfolderType subType, out Folder folder)
+        {
+            try
+            {
+                folder = new Folder(path, subType);
+                return true;
+            }
+            catch
+            {
+                folder = null;
+                return false;
+            }
+        }
+
         public FileInfo[] Refresh()
         {
             if (Directory == null) return Files = new FileInfo[0];

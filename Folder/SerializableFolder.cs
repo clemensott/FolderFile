@@ -15,6 +15,11 @@ namespace FolderFile
             SubType = subType;
         }
 
+        public bool TryConvert(out Folder folder)
+        {
+            return Folder.TryCreate(this, out folder);
+        }
+
         public override bool Equals(object obj)
         {
             return obj is SerializableFolder && Equals((SerializableFolder)obj);
