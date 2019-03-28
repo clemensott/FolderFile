@@ -50,6 +50,7 @@
     </Compile>
     <Compile Include="File\FileOpenPicker.cs" />
     <Compile Include="File\FileSavePicker.cs" />
+    <Compile Include="Folder\AutoRefreshSelectionType.cs" />
     <Compile Include="Folder\DirectoryInfoExtension.cs" />
     <Compile Include="Folder\FolderChangedArgs.cs" />
     <Compile Include="Folder\FolderPicker.xaml.cs">

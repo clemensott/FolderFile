@@ -1,38 +1,68 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace FolderFile
 {
     public class Folder : INotifyPropertyChanged
     {
+        public const bool AutoRefreshDefault = true;
+        public const SubfolderType SubTypeDefault = SubfolderType.No;
+
+        private bool autoRefresh, exists;
         private SubfolderType subType;
         private FileInfo[] files;
+        private Task<FileInfo[]> refreshTask;
 
-        public string OriginalPath { get; private set; }
+        public bool AutoRefresh
+        {
+            get => autoRefresh;
+            set
+            {
+                if (value == autoRefresh) return;
 
-        public string Name { get; private set; }
+                autoRefresh = value;
+                OnPropertyChanged(nameof(AutoRefresh));
+            }
+        }
 
-        public string FullName { get; private set; }
+        public bool Exists
+        {
+            get => exists;
+            private set
+            {
+                if (value == exists) return;
 
-        public DirectoryInfo Directory { get; private set; }
+                exists = value;
+                OnPropertyChanged(nameof(Exists));
+            }
+        }
+
+        public string OriginalPath { get; }
+
+        public string Name { get; }
+
+        public string FullName { get; }
 
         public SubfolderType SubType
         {
-            get { return subType; }
+            get => subType;
             set
             {
                 if (value == subType) return;
 
                 subType = value;
                 OnPropertyChanged(nameof(SubType));
-                Refresh();
+
+                if (AutoRefresh) RefreshAsync();
             }
         }
 
         public FileInfo[] Files
         {
-            get { return files; }
+            get => files;
             set
             {
                 if (value == files) return;
@@ -42,101 +72,121 @@ namespace FolderFile
             }
         }
 
-        private Folder(SubfolderType subType, FileInfo[] files, string originalPath, string name, string fullName, DirectoryInfo directory)
+        public Task<FileInfo[]> RefreshTask
+        {
+            get => refreshTask;
+            set
+            {
+                if (value == refreshTask) return;
+
+                refreshTask = value;
+                OnPropertyChanged(nameof(RefreshTask));
+            }
+        }
+
+        private Folder(SubfolderType subType, FileInfo[] files, string originalPath,
+            string name, string fullName, bool autoRefresh, bool exists)
         {
             this.subType = subType;
             this.files = files;
             OriginalPath = originalPath;
             Name = name;
             FullName = fullName;
-            Directory = directory;
+            this.autoRefresh = autoRefresh;
+            this.exists = exists;
         }
 
-        public Folder(string path, SubfolderType subType)
+        public Folder(string path) : this(path, SubTypeDefault, AutoRefreshDefault)
         {
+        }
+
+        public Folder(string path, SubfolderType subType) : this(path, subType, AutoRefreshDefault)
+        {
+        }
+
+        public Folder(string path, bool autoRefresh) : this(path, SubTypeDefault, autoRefresh)
+        {
+        }
+
+        public Folder(string path, SubfolderType subType, bool autoRefresh)
+        {
+            AutoRefresh = autoRefresh;
             OriginalPath = path;
             SubType = subType;
 
-            Directory = new DirectoryInfo(path);
-
-            Name = Directory.Name;
-            FullName = Directory.FullName;
-
-            Refresh();
-        }
-
-        public Folder(DirectoryInfo directory, SubfolderType subType)
-        {
-            Directory = directory ?? throw new System.ArgumentNullException(nameof(directory));
-
-            OriginalPath = Directory.FullName;
-            Name = Directory?.Name;
-            FullName = Directory?.FullName;
-
-            Refresh();
-        }
-
-        public static bool TryCreate(SerializableFolder? serialFolder, out Folder folder)
-        {
-            try
-            {
-                if (serialFolder.HasValue)
-                {
-                    folder = serialFolder;
-                    return true;
-                }
-                else
-                {
-                    folder = null;
-                    return false;
-                }
-            }
-            catch
-            {
-                folder = null;
-                return false;
-            }
-        }
-
-        public static bool TryCreate(string path, SubfolderType subType, out Folder folder)
-        {
-            try
-            {
-                folder = new Folder(path, subType);
-                return true;
-            }
-            catch
-            {
-                folder = null;
-                return false;
-            }
+            Name = Path.GetFileName(OriginalPath);
+            FullName = Path.GetFullPath(OriginalPath);
+            Exists = Directory.Exists(FullName);
         }
 
         public FileInfo[] Refresh()
         {
-            if (Directory == null) return Files = new FileInfo[0];
+            try
+            {
+                Exists = Directory.Exists(FullName);
+
+                return Files = GetDirectory().EnumerateFiles(SubType).ToArray();
+            }
+            catch
+            {
+                return Files = new FileInfo[0];
+            }
+        }
+
+        public async Task<FileInfo[]> RefreshAsync()
+        {
+            Task<FileInfo[]> task = RefreshTask = Task.Run(() => GetDirectory().EnumerateFiles(SubType).ToArray());
 
             try
             {
-                Directory.Refresh();
-            }
-            catch { }
+                Exists = Directory.Exists(FullName);
 
-            return Files = DirectoryInfoExtension.EnumerateFiles(Directory, SubType).ToArray();
+                FileInfo[] refreshFiles = await task;
+                if (task == RefreshTask || (!RefreshTask.IsCompleted && !RefreshTask.IsCanceled && !RefreshTask.IsFaulted))
+                {
+                    Files = refreshFiles;
+                }
+
+                return refreshFiles;
+            }
+            catch
+            {
+                FileInfo[] refreshFiles = new FileInfo[0];
+                if (task == RefreshTask || (!RefreshTask.IsCompleted && !RefreshTask.IsCanceled && !RefreshTask.IsFaulted))
+                {
+                    Files = refreshFiles;
+                }
+
+                return refreshFiles;
+            }
         }
 
         public FileInfo[] RefreshThrow()
         {
-            if (Directory == null) return Files = new FileInfo[0];
+            Exists = Directory.Exists(FullName);
 
-            Directory.Refresh();
-
-            return Files = DirectoryInfoExtension.EnumerateFilesThrow(Directory, SubType).ToArray();
+            return Files = GetDirectory().EnumerateFilesThrow(SubType).ToArray();
         }
+
+        public async Task<FileInfo[]> RefreshThrowAsync()
+        {
+            Task<FileInfo[]> task = RefreshTask = Task.Run(() => GetDirectory().EnumerateFilesThrow(SubType).ToArray());
+            Exists = Directory.Exists(FullName);
+
+            FileInfo[] refreshFiles = await task;
+            if (task == RefreshTask || (!RefreshTask.IsCompleted && !RefreshTask.IsCanceled && !RefreshTask.IsFaulted))
+            {
+                Files = refreshFiles;
+            }
+
+            return refreshFiles;
+        }
+
+        public DirectoryInfo GetDirectory() => new DirectoryInfo(OriginalPath);
 
         public void OpenInExplorer()
         {
-            Directory.OpenInExplorer();
+            Process.Start(FullName);
         }
 
         public void DeleteContent()
@@ -146,7 +196,7 @@ namespace FolderFile
 
         public void DeleteContent(SubfolderType type)
         {
-            Directory?.DeleteContent(type);
+            GetDirectory().DeleteContent(type);
         }
 
         public long GetLength()
@@ -156,12 +206,12 @@ namespace FolderFile
 
         public long GetLength(SubfolderType type)
         {
-            return Directory?.GetLength(type) ?? 0L;
+            return GetDirectory().GetLength(type);
         }
 
         public Folder Clone()
         {
-            return new Folder(SubType, Files.ToArray(), OriginalPath, Name, FullName, new DirectoryInfo(Directory.FullName));
+            return new Folder(SubType, Files.ToArray(), OriginalPath, Name, FullName, AutoRefresh, Exists);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -169,6 +219,74 @@ namespace FolderFile
         private void OnPropertyChanged(string name)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
+        public static Folder CreateOrDefault(SerializableFolder? serialFolder)
+        {
+            Folder folder;
+            return TryCreate(serialFolder, out folder) ? folder : null;
+        }
+
+        public static bool TryCreate(SerializableFolder? serialFolder, out Folder folder)
+        {
+            try
+            {
+                if (serialFolder.HasValue)
+                {
+                    folder = (Folder)serialFolder;
+                    return true;
+                }
+
+                folder = null;
+                return false;
+            }
+            catch
+            {
+                folder = null;
+                return false;
+            }
+        }
+
+        public static Folder CreateOrDefault(string path)
+        {
+            Folder folder;
+            return TryCreate(path, out folder) ? folder : null;
+        }
+
+        public static bool TryCreate(string path, out Folder folder)
+        {
+            return TryCreate(path, SubTypeDefault, AutoRefreshDefault, out folder);
+        }
+
+        public static Folder CreateOrDefault(string path, SubfolderType subType)
+        {
+            Folder folder;
+            return TryCreate(path, subType, out folder) ? folder : null;
+        }
+
+        public static bool TryCreate(string path, SubfolderType subType, out Folder folder)
+        {
+            return TryCreate(path, subType, AutoRefreshDefault, out folder);
+        }
+
+        public static Folder CreateOrDefault(string path, SubfolderType subType, bool autoRefresh)
+        {
+            Folder folder;
+            return TryCreate(path, subType, autoRefresh, out folder) ? folder : null;
+        }
+
+        public static bool TryCreate(string path, SubfolderType subType, bool autoRefresh, out Folder folder)
+        {
+            try
+            {
+                folder = new Folder(path, subType, autoRefresh);
+                return true;
+            }
+            catch
+            {
+                folder = null;
+                return false;
+            }
         }
     }
 }

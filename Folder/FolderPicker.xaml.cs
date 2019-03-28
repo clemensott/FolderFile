@@ -7,9 +7,6 @@ using System.Windows.Input;
 
 namespace FolderFile
 {
-    /// <summary>
-    /// Interaktionslogik für FolderPicker.xaml
-    /// </summary>
     public partial class FolderPicker : UserControl
     {
         private const double margin = 5;
@@ -17,7 +14,7 @@ namespace FolderFile
 
         public static readonly DependencyProperty SingleLineProperty =
             DependencyProperty.Register("SingleLine", typeof(bool), typeof(FolderPicker),
-                new PropertyMetadata(true, new PropertyChangedCallback(OnSingleLinePropertyChanged)));
+                new PropertyMetadata(true, OnSingleLinePropertyChanged));
 
         private static void OnSingleLinePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
@@ -40,9 +37,9 @@ namespace FolderFile
             }
         }
 
-        public static readonly DependencyProperty SubTypeSelectionProperty =
-            DependencyProperty.Register("SubTypeSelection", typeof(SubfolderSelectionType), typeof(FolderPicker),
-                new PropertyMetadata(SubfolderSelectionType.Auto, new PropertyChangedCallback(OnSubTypeSelectionPropertyChanged)));
+        public static readonly DependencyProperty SubTypeSelectionProperty = DependencyProperty.Register("SubTypeSelection",
+            typeof(SubfolderSelectionType), typeof(FolderPicker),
+                new PropertyMetadata(SubfolderSelectionType.Auto, OnSubTypeSelectionPropertyChanged));
 
         private static void OnSubTypeSelectionPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
@@ -54,20 +51,66 @@ namespace FolderFile
             else
             {
                 SubfolderType subType = GetSubfolderType(oldValue, s.cbxSubfolder.IsChecked);
-                (bool isVisable, bool? isChecked) = GetCbxSubfolderProperties(newValue, subType);
+                (bool isVisible, bool? isChecked) = GetCbxSubfolderProperties(newValue, subType);
 
-                s.cbxSubfolder.Visibility = isVisable ? Visibility.Visible : Visibility.Collapsed;
+                s.cbxSubfolder.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
                 s.cbxSubfolder.IsChecked = isChecked;
+            }
+        }
+
+        public static readonly DependencyProperty AutoRefreshSelectionProperty = DependencyProperty.Register("AutoRefreshSelection",
+            typeof(AutoRefreshSelectionType), typeof(FolderPicker),
+                new PropertyMetadata(AutoRefreshSelectionType.Visible, OnAutoRefreshSelectionPropertyChanged));
+
+        private static void OnAutoRefreshSelectionPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            var s = (FolderPicker)sender;
+            var value = (AutoRefreshSelectionType)e.NewValue;
+
+            s.cbxAutoRefresh.Visibility = value == AutoRefreshSelectionType.Visible ? Visibility.Visible : Visibility.Collapsed;
+
+            switch (value)
+            {
+                case AutoRefreshSelectionType.True:
+                case AutoRefreshSelectionType.ForceTrue:
+                    s.cbxAutoRefresh.IsChecked = true;
+                    break;
+
+                case AutoRefreshSelectionType.False:
+                case AutoRefreshSelectionType.ForceFalse:
+                    s.cbxAutoRefresh.IsChecked = false;
+                    break;
+            }
+
+            if (s.Folder == null) return;
+
+            switch (value)
+            {
+                case AutoRefreshSelectionType.Visible:
+                    s.cbxAutoRefresh.IsChecked = s.Folder.AutoRefresh;
+                    break;
+
+                case AutoRefreshSelectionType.Collapsed:
+                    s.cbxAutoRefresh.IsChecked = s.Folder.AutoRefresh;
+                    break;
+
+                case AutoRefreshSelectionType.ForceTrue:
+                    s.Folder.AutoRefresh = true;
+                    break;
+
+                case AutoRefreshSelectionType.ForceFalse:
+                    s.Folder.AutoRefresh = false;
+                    break;
             }
         }
 
         public static readonly DependencyProperty FolderProperty =
             DependencyProperty.Register("Folder", typeof(Folder), typeof(FolderPicker),
-                new PropertyMetadata(null, new PropertyChangedCallback(OnFolderPropertyChanged)));
+                new PropertyMetadata(null, OnFolderPropertyChanged));
 
         private static void OnFolderPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var s = sender as FolderPicker;
+            var s = (FolderPicker)sender;
             var oldValue = (Folder)e.OldValue;
             var newValue = (Folder)e.NewValue;
 
@@ -79,24 +122,45 @@ namespace FolderFile
                 s.UpdateCbxSubfolder();
 
                 s.tbxPath.Text = newValue.OriginalPath;
+                s.tbxPath.Foreground = newValue.Exists ? s.tbxPathForeground : errorBrush;
+
+                switch (s.AutoRefreshSelection)
+                {
+                    case AutoRefreshSelectionType.Visible:
+                        s.cbxAutoRefresh.IsChecked = newValue.AutoRefresh;
+                        break;
+
+                    case AutoRefreshSelectionType.Collapsed:
+                        s.cbxAutoRefresh.IsChecked = newValue.AutoRefresh;
+                        break;
+
+                    case AutoRefreshSelectionType.ForceTrue:
+                        newValue.AutoRefresh = true;
+                        break;
+
+                    case AutoRefreshSelectionType.ForceFalse:
+                        newValue.AutoRefresh = false;
+                        break;
+                }
             }
             else
             {
-                (bool isVisable, bool? isChecked) = GetCbxSubfolderProperties(s.SubTypeSelection, oldValue.SubType);
+                (bool isVisible, bool? isChecked) = GetCbxSubfolderProperties(s.SubTypeSelection, oldValue.SubType);
 
-                s.cbxSubfolder.Visibility = isVisable ? Visibility.Visible : Visibility.Collapsed;
+                s.cbxSubfolder.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
                 s.cbxSubfolder.IsChecked = isChecked;
+                s.tbxPath.Foreground = errorBrush;
             }
 
             var args = new FolderChangedArgs(oldValue, newValue);
             s.FolderChanged?.Invoke(s, args);
         }
 
-        public static readonly DependencyProperty IsChangeButtonVisableProperty =
-            DependencyProperty.Register("IsChangeButtonVisable", typeof(bool), typeof(FolderPicker),
-                new PropertyMetadata(true, new PropertyChangedCallback(OnIsChangeButtonVisablePropertyChanged)));
+        public static readonly DependencyProperty IsChangeButtonVisibleProperty =
+            DependencyProperty.Register("IsChangeButtonVisible", typeof(bool), typeof(FolderPicker),
+                new PropertyMetadata(true, OnIsChangeButtonVisiblePropertyChanged));
 
-        private static void OnIsChangeButtonVisablePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        private static void OnIsChangeButtonVisiblePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             var s = (FolderPicker)sender;
             var value = (bool)e.NewValue;
@@ -104,11 +168,11 @@ namespace FolderFile
             s.btnChange.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
         }
 
-        public static readonly DependencyProperty IsRefreshButtonVisableProperty =
-            DependencyProperty.Register("IsRefreshButtonVisable", typeof(bool), typeof(FolderPicker),
-                new PropertyMetadata(true, new PropertyChangedCallback(OnIsRefreshButtonVisablePropertyChanged)));
+        public static readonly DependencyProperty IsRefreshButtonVisibleProperty =
+            DependencyProperty.Register("IsRefreshButtonVisible", typeof(bool), typeof(FolderPicker),
+                new PropertyMetadata(true, OnIsRefreshButtonVisiblePropertyChanged));
 
-        private static void OnIsRefreshButtonVisablePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        private static void OnIsRefreshButtonVisiblePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             var s = (FolderPicker)sender;
             var value = (bool)e.NewValue;
@@ -116,11 +180,11 @@ namespace FolderFile
             s.btnRefresh.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
         }
 
-        public static readonly DependencyProperty IsOpenButtonVisableProperty =
-            DependencyProperty.Register("IsOpenButtonVisable", typeof(bool), typeof(FolderPicker),
-                new PropertyMetadata(true, new PropertyChangedCallback(OnIsOpenButtonVisablePropertyChanged)));
+        public static readonly DependencyProperty IsOpenButtonVisibleProperty =
+            DependencyProperty.Register("IsOpenButtonVisible", typeof(bool), typeof(FolderPicker),
+                new PropertyMetadata(true, OnIsOpenButtonVisiblePropertyChanged));
 
-        private static void OnIsOpenButtonVisablePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        private static void OnIsOpenButtonVisiblePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             var s = (FolderPicker)sender;
             var value = (bool)e.NewValue;
@@ -135,38 +199,44 @@ namespace FolderFile
 
         public bool SingleLine
         {
-            get { return (bool)GetValue(SingleLineProperty); }
-            set { SetValue(SingleLineProperty, value); }
+            get => (bool)GetValue(SingleLineProperty);
+            set => SetValue(SingleLineProperty, value);
         }
 
         public SubfolderSelectionType SubTypeSelection
         {
-            get { return (SubfolderSelectionType)GetValue(SubTypeSelectionProperty); }
-            set { SetValue(SubTypeSelectionProperty, value); }
+            get => (SubfolderSelectionType)GetValue(SubTypeSelectionProperty);
+            set => SetValue(SubTypeSelectionProperty, value);
+        }
+
+        public AutoRefreshSelectionType AutoRefreshSelection
+        {
+            get => (AutoRefreshSelectionType)GetValue(AutoRefreshSelectionProperty);
+            set => SetValue(AutoRefreshSelectionProperty, value);
         }
 
         public Folder Folder
         {
-            get { return (Folder)GetValue(FolderProperty); }
-            set { SetValue(FolderProperty, value); }
+            get => (Folder)GetValue(FolderProperty);
+            set => SetValue(FolderProperty, value);
         }
 
-        public bool IsChangeButtonVisable
+        public bool IsChangeButtonVisible
         {
-            get { return (bool)GetValue(IsChangeButtonVisableProperty); }
-            set { SetValue(IsChangeButtonVisableProperty, value); }
+            get => (bool)GetValue(IsChangeButtonVisibleProperty);
+            set => SetValue(IsChangeButtonVisibleProperty, value);
         }
 
-        public bool IsRefreshButtonVisable
+        public bool IsRefreshButtonVisible
         {
-            get { return (bool)GetValue(IsRefreshButtonVisableProperty); }
-            set { SetValue(IsRefreshButtonVisableProperty, value); }
+            get => (bool)GetValue(IsRefreshButtonVisibleProperty);
+            set => SetValue(IsRefreshButtonVisibleProperty, value);
         }
 
-        public bool IsOpenButtonVisable
+        public bool IsOpenButtonVisible
         {
-            get { return (bool)GetValue(IsOpenButtonVisableProperty); }
-            set { SetValue(IsOpenButtonVisableProperty, value); }
+            get => (bool)GetValue(IsOpenButtonVisibleProperty);
+            set => SetValue(IsOpenButtonVisibleProperty, value);
         }
 
         public FolderPicker()
@@ -179,12 +249,14 @@ namespace FolderFile
 
         private void TbxPath_TextChanged(object sender, TextChangedEventArgs e)
         {
-            try
+            if (Folder?.OriginalPath == tbxPath.Text) return;
+
+            Folder folder;
+            if (Folder.TryCreate(tbxPath.Text, GetSubfolderType(), cbxAutoRefresh.IsChecked == true, out folder))
             {
-                Folder = new Folder(tbxPath.Text, GetSubfolderType());
-                tbxPath.Foreground = tbxPathForeground;
+                Folder = folder;
             }
-            catch
+            else
             {
                 Folder = null;
                 tbxPath.Foreground = errorBrush;
@@ -253,18 +325,28 @@ namespace FolderFile
             }
         }
 
+        private void CbxAutoRefresh_Checked(object sender, RoutedEventArgs e)
+        {
+            if (Folder != null) Folder.AutoRefresh = true;
+        }
+
+        private void CbxAutoRefresh_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (Folder != null) Folder.AutoRefresh = false;
+        }
+
         private void BtnChange_Click(object sender, RoutedEventArgs e)
         {
             if (Folder != null) fbd.SelectedPath = Folder.FullName;
 
             if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                try
+                Folder folder;
+                if (Folder.TryCreate(fbd.SelectedPath, GetSubfolderType(), cbxAutoRefresh.IsChecked == true, out folder))
                 {
-                    Folder = new Folder(fbd.SelectedPath, GetSubfolderType());
+                    Folder = folder;
                     tbxPath.Text = Folder.OriginalPath;
                 }
-                catch { }
             }
         }
 
@@ -326,6 +408,23 @@ namespace FolderFile
                 case nameof(Folder.SubType):
                     UpdateCbxSubfolder();
                     break;
+
+                case nameof(Folder.Exists):
+                    tbxPath.Foreground = Folder.Exists ? tbxPathForeground : errorBrush;
+                    break;
+
+                case nameof(Folder.AutoRefresh) when AutoRefreshSelection == AutoRefreshSelectionType.Visible:
+                case nameof(Folder.AutoRefresh) when AutoRefreshSelection == AutoRefreshSelectionType.Collapsed:
+                    cbxAutoRefresh.IsChecked = Folder.AutoRefresh;
+                    break;
+
+                case nameof(Folder.AutoRefresh) when AutoRefreshSelection == AutoRefreshSelectionType.ForceTrue:
+                    Folder.AutoRefresh = true;
+                    break;
+
+                case nameof(Folder.AutoRefresh) when AutoRefreshSelection == AutoRefreshSelectionType.ForceFalse:
+                    Folder.AutoRefresh = false;
+                    break;
             }
         }
 
@@ -338,15 +437,15 @@ namespace FolderFile
                 return;
             }
 
-            (bool isVisable, bool? isChecked) = GetCbxSubfolderProperties(SubTypeSelection, Folder.SubType);
+            (bool isVisible, bool? isChecked) = GetCbxSubfolderProperties(SubTypeSelection, Folder.SubType);
 
-            cbxSubfolder.Visibility = isVisable ? Visibility.Visible : Visibility.Collapsed;
+            cbxSubfolder.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
             cbxSubfolder.IsChecked = isChecked;
         }
 
-        private static (bool isVisable, bool? isChecked) GetCbxSubfolderProperties(SubfolderSelectionType sel, SubfolderType sub)
+        private static (bool isVisible, bool? isChecked) GetCbxSubfolderProperties(SubfolderSelectionType sel, SubfolderType sub)
         {
-            bool isVisable;
+            bool isVisible;
             bool? isChecked;
 
             if ((sel == SubfolderSelectionType.Auto && sub == SubfolderType.No) ||
@@ -355,9 +454,9 @@ namespace FolderFile
                 (sel == SubfolderSelectionType.NoThis && sub == SubfolderType.All) ||
                 (sel == SubfolderSelectionType.ThisAll && sub == SubfolderType.No))
             {
-                isVisable = false;
+                isVisible = false;
             }
-            else isVisable = true;
+            else isVisible = true;
 
 
             if ((sel == SubfolderSelectionType.Auto && sub == SubfolderType.No) ||
@@ -378,7 +477,7 @@ namespace FolderFile
             }
             else isChecked = true;
 
-            return (isVisable, isChecked);
+            return (isVisible, isChecked);
         }
     }
 }
