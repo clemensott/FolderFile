@@ -112,11 +112,13 @@ namespace FolderFile
         {
             AutoRefresh = autoRefresh;
             OriginalPath = path;
-            SubType = subType;
 
             Name = Path.GetFileName(OriginalPath);
             FullName = Path.GetFullPath(OriginalPath);
             Exists = Directory.Exists(FullName);
+
+            Files = new FileInfo[0];
+            SubType = subType;
         }
 
         public FileInfo[] Refresh()
@@ -211,7 +213,7 @@ namespace FolderFile
 
         public Folder Clone()
         {
-            return new Folder(SubType, Files.ToArray(), OriginalPath, Name, FullName, AutoRefresh, Exists);
+            return new Folder(SubType, Files?.ToArray(), OriginalPath, Name, FullName, AutoRefresh, Exists);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
