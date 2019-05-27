@@ -11,8 +11,8 @@ namespace FolderFile
 
         private static void OnFilterPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var s = sender as FileSavePicker;
-            var value = (string)e.NewValue;
+            FileSavePicker s = (FileSavePicker)sender;
+            string value = (string)e.NewValue;
 
             s.fd.Filter = value;
         }

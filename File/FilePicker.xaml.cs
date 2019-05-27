@@ -1,5 +1,4 @@
 ﻿using Microsoft.Win32;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
@@ -20,8 +19,8 @@ namespace FolderFile
 
         private static void OnSingleLinePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var s = (FilePicker)sender;
-            var value = (bool)e.NewValue;
+            FilePicker s = (FilePicker)sender;
+            bool value = (bool)e.NewValue;
 
             if (value)
             {
@@ -43,8 +42,8 @@ namespace FolderFile
 
         protected static void OnFilePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var s = sender as FilePicker;
-            var value = (FileInfo)e.NewValue;
+            FilePicker s = (FilePicker)sender;
+            FileInfo value = (FileInfo)e.NewValue;
 
             s.tbxPath.Text = s.fd.FileName = value?.FullName;
         }

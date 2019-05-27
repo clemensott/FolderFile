@@ -188,7 +188,8 @@ namespace FolderFile
 
         public void OpenInExplorer()
         {
-            Process.Start(FullName);
+            string args = string.Format("/select,\"{0}\"", FullName);
+            Process.Start("explorer.exe", args);
         }
 
         public void DeleteContent()

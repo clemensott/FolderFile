@@ -18,8 +18,8 @@ namespace FolderFile
 
         private static void OnSingleLinePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var s = (FolderPicker)sender;
-            var value = (bool)e.NewValue;
+            FolderPicker s = (FolderPicker)sender;
+            bool value = (bool)e.NewValue;
 
             if (value)
             {
@@ -43,9 +43,9 @@ namespace FolderFile
 
         private static void OnSubTypeSelectionPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var s = (FolderPicker)sender;
-            var oldValue = (SubfolderSelectionType)e.OldValue;
-            var newValue = (SubfolderSelectionType)e.NewValue;
+            FolderPicker s = (FolderPicker)sender;
+            SubfolderSelectionType oldValue = (SubfolderSelectionType)e.OldValue;
+            SubfolderSelectionType newValue = (SubfolderSelectionType)e.NewValue;
 
             if (s.Folder != null) s.UpdateCbxSubfolder();
             else
@@ -64,8 +64,8 @@ namespace FolderFile
 
         private static void OnAutoRefreshSelectionPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var s = (FolderPicker)sender;
-            var value = (AutoRefreshSelectionType)e.NewValue;
+            FolderPicker s = (FolderPicker)sender;
+            AutoRefreshSelectionType value = (AutoRefreshSelectionType)e.NewValue;
 
             s.cbxAutoRefresh.Visibility = value == AutoRefreshSelectionType.Visible ? Visibility.Visible : Visibility.Collapsed;
 
@@ -110,9 +110,9 @@ namespace FolderFile
 
         private static void OnFolderPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var s = (FolderPicker)sender;
-            var oldValue = (Folder)e.OldValue;
-            var newValue = (Folder)e.NewValue;
+            FolderPicker s = (FolderPicker)sender;
+            Folder oldValue = (Folder)e.OldValue;
+            Folder newValue = (Folder)e.NewValue;
 
             if (oldValue != null) oldValue.PropertyChanged -= s.Folder_PropertyChanged;
             if (newValue != null) newValue.PropertyChanged -= s.Folder_PropertyChanged;
@@ -150,9 +150,10 @@ namespace FolderFile
                 s.cbxSubfolder.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
                 s.cbxSubfolder.IsChecked = isChecked;
                 s.tbxPath.Foreground = errorBrush;
+                s.tbxPath.Text = string.Empty;
             }
 
-            var args = new FolderChangedArgs(oldValue, newValue);
+            FolderChangedArgs args = new FolderChangedArgs(oldValue, newValue);
             s.FolderChanged?.Invoke(s, args);
         }
 
@@ -162,8 +163,8 @@ namespace FolderFile
 
         private static void OnIsChangeButtonVisiblePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var s = (FolderPicker)sender;
-            var value = (bool)e.NewValue;
+            FolderPicker s = (FolderPicker)sender;
+            bool value = (bool)e.NewValue;
 
             s.btnChange.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
         }
@@ -174,8 +175,8 @@ namespace FolderFile
 
         private static void OnIsRefreshButtonVisiblePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var s = (FolderPicker)sender;
-            var value = (bool)e.NewValue;
+            FolderPicker s = (FolderPicker)sender;
+            bool value = (bool)e.NewValue;
 
             s.btnRefresh.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
         }
@@ -186,8 +187,8 @@ namespace FolderFile
 
         private static void OnIsOpenButtonVisiblePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var s = (FolderPicker)sender;
-            var value = (bool)e.NewValue;
+            FolderPicker s = (FolderPicker)sender;
+            bool value = (bool)e.NewValue;
 
             s.btnOpen.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
         }
