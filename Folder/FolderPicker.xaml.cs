@@ -115,7 +115,7 @@ namespace FolderFile
             Folder newValue = (Folder)e.NewValue;
 
             if (oldValue != null) oldValue.PropertyChanged -= s.Folder_PropertyChanged;
-            if (newValue != null) newValue.PropertyChanged -= s.Folder_PropertyChanged;
+            if (newValue != null) newValue.PropertyChanged += s.Folder_PropertyChanged;
 
             if (newValue != null)
             {
