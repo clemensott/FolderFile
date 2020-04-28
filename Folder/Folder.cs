@@ -186,10 +186,15 @@ namespace FolderFile
 
         public DirectoryInfo GetDirectory() => new DirectoryInfo(OriginalPath);
 
-        public void OpenInExplorer()
+        public void SelectInExplorer()
         {
             string args = string.Format("/select,\"{0}\"", FullName);
             Process.Start("explorer.exe", args);
+        }
+
+        public void OpenInExplorer()
+        {
+            Process.Start("explorer.exe", FullName);
         }
 
         public void DeleteContent()
