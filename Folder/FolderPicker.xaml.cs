@@ -193,6 +193,16 @@ namespace FolderFile
             s.btnOpen.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
         }
 
+        public static readonly DependencyProperty OpenTypeProperty =
+            DependencyProperty.Register("OpenType", typeof(FolderOpenType), typeof(FolderPicker),
+                new PropertyMetadata(OnOpenTypePropertyChanged));
+
+        private static void OnOpenTypePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            FolderPicker s = (FolderPicker)sender;
+            FolderOpenType value = (FolderOpenType)e.NewValue;
+        }
+
         private readonly Brush tbxPathForeground;
         private System.Windows.Forms.FolderBrowserDialog fbd;
 
@@ -238,6 +248,12 @@ namespace FolderFile
         {
             get => (bool)GetValue(IsOpenButtonVisibleProperty);
             set => SetValue(IsOpenButtonVisibleProperty, value);
+        }
+
+        public FolderOpenType OpenType
+        {
+            get => (FolderOpenType)GetValue(OpenTypeProperty);
+            set => SetValue(OpenTypeProperty, value);
         }
 
         public FolderPicker()
@@ -360,7 +376,16 @@ namespace FolderFile
         {
             try
             {
-                Folder?.OpenInExplorer();
+                switch (OpenType)
+                {
+                    case FolderOpenType.Parent:
+                        Folder?.SelectInExplorer();
+                        break;
+
+                    case FolderOpenType.Content:
+                        Folder?.OpenInExplorer();
+                        break;
+                }
             }
             catch { }
         }
