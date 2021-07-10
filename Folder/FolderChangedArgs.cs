@@ -4,9 +4,9 @@ namespace FolderFile
 {
     public class FolderChangedArgs : EventArgs
     {
-        public Folder OldFolder { get; private set; }
+        public Folder OldFolder { get; }
 
-        public Folder NewFolder { get; private set; }
+        public Folder NewFolder { get; }
 
         public FolderChangedArgs(Folder oldFolder, Folder newFolder)
         {
